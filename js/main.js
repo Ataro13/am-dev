@@ -17,6 +17,30 @@
     if (mLink) mLink.classList.add("active");
   }
 
+  /* ---------- Тема: день/ночь ---------- */
+  var themeKey = "amdev-theme";
+  var themeBtn = document.getElementById("themeToggle");
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    if (themeBtn) themeBtn.setAttribute("aria-pressed", theme === "light");
+  }
+
+  (function initTheme() {
+    var saved = null;
+    try { saved = localStorage.getItem(themeKey); } catch (e) {}
+    applyTheme(saved === "light" ? "light" : "dark");
+  })();
+
+  if (themeBtn) {
+    themeBtn.addEventListener("click", function () {
+      var current = document.documentElement.getAttribute("data-theme");
+      var next = current === "light" ? "dark" : "light";
+      applyTheme(next);
+      try { localStorage.setItem(themeKey, next); } catch (e) {}
+    });
+  }
+
   /* ---------- Мобильное меню ---------- */
   var burger = document.getElementById("burger");
   var mobileMenu = document.getElementById("mobileMenu");
