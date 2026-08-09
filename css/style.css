@@ -262,6 +262,35 @@ body::after {
 .burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
 
+/* Действия в шапке: переключатель темы + бургер */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* Переключатель день/ночь */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  transition:
+    color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+  flex-shrink: 0;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--text); }
+.theme-toggle svg { width: 18px; height: 18px; }
+.theme-toggle .icon-moon { display: none; }
+html[data-theme="light"] .theme-toggle .icon-sun { display: none; }
+html[data-theme="light"] .theme-toggle .icon-moon { display: block; }
+
 /* Мобильное меню */
 .mobile-menu {
   position: fixed;
@@ -1149,3 +1178,47 @@ html.has-cursor .cursor-dot { opacity: 1; }
   .logo .logo-caret, .terminal .blink { animation: none; opacity: 1; }
   .hero-title .t-line::after { transform: scaleX(1); animation: none; }
 }
+
+/* ---------- 21. LIGHT THEME (дневная схема) ---------- */
+html[data-theme="light"] {
+  --bg:        #F4F4F1;
+  --bg-2:      #EBEBE8;
+  --bg-3:      #E0E0DC;
+  --line:      rgba(10, 10, 10, 0.10);
+  --line-2:    rgba(10, 10, 10, 0.22);
+  --text:      #0A0A0A;
+  --text-dim:  #4D4D4A;
+  --text-mute: #8C8C88;
+}
+
+/* Жёсткие цвета, не переведённые на переменные */
+html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #B9B9B5; border-color: var(--bg); }
+html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #9C9C98; }
+
+html[data-theme="light"] .site-header { background: rgba(244, 244, 241, 0.78); }
+
+html[data-theme="light"] .btn-primary:hover { background: #1A1A1A; border-color: #1A1A1A; }
+html[data-theme="light"] .btn-ghost:hover { background: rgba(10, 10, 10, 0.07); }
+
+html[data-theme="light"] .outline-text { -webkit-text-stroke: 1px rgba(10, 10, 10, 0.14); }
+html[data-theme="light"] .hero-title .t-dim,
+html[data-theme="light"] .page-title .t-dim,
+html[data-theme="light"] .cta-banner h2 .t-dim { -webkit-text-stroke: 1.5px rgba(10, 10, 10, 0.30); }
+html[data-theme="light"] .step-num { -webkit-text-stroke: 1px rgba(10, 10, 10, 0.30); }
+
+html[data-theme="light"] .cookie-banner { box-shadow: 0 24px 64px rgba(0, 0, 0, 0.12); }
+
+/* Переход между темами */
+html { transition: background var(--dur) var(--ease), color var(--dur) var(--ease); }
+html body,
+html .site-header,
+html .card,
+html .feature,
+html .step,
+html .price-card,
+html .port-slot,
+html .mobile-menu,
+html .cookie-banner,
+html .terminal,
+html .form-group input,
+html .form-group textarea { transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease); }
