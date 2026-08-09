@@ -1197,6 +1197,9 @@ html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #9C9C98; 
 
 html[data-theme="light"] .site-header { background: rgba(244, 244, 241, 0.78); }
 
+/* Курсор-точка: белый + mix-blend-mode:difference даёт контраст на любом фоне */
+html[data-theme="light"] .cursor-dot { background: #FFFFFF; }
+
 html[data-theme="light"] .btn-primary:hover { background: #1A1A1A; border-color: #1A1A1A; }
 html[data-theme="light"] .btn-ghost:hover { background: rgba(10, 10, 10, 0.07); }
 
