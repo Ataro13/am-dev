@@ -158,6 +158,11 @@
       return el ? el.value.trim() : "";
     }
 
+    function consentValue() {
+      var el = form.querySelector('[name="consent"]');
+      return el && el.checked ? "да" : "нет";
+    }
+
     form.addEventListener("submit", function (e) {
       e.preventDefault();
 
@@ -184,7 +189,8 @@
           _honey: fieldValue("_honey"),
           name: fieldValue("name"),
           contact: fieldValue("contact"),
-          message: fieldValue("message")
+          message: fieldValue("message"),
+          consent_personal_data: consentValue()
         })
       })
         .then(function (res) { return res.json(); })
