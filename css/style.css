@@ -1224,4 +1224,376 @@ html .mobile-menu,
 html .cookie-banner,
 html .terminal,
 html .form-group input,
-html .form-group textarea { transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+html .form-group textarea,
+html .cab-login,
+html .cab-sec { transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+
+/* ============ 22. CABINET (личный кабинет) ============ */
+/* Стили кабинета построены только на переменных дизайн-системы,
+   поэтому светлой теме переопределения не требуются. */
+
+.cab { min-height: 320px; }
+
+/* --- Логин-карта --- */
+.cab-login {
+  position: relative;
+  max-width: 520px;
+  margin-inline: auto;
+  padding: clamp(1.75rem, 4vw, 3rem);
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+}
+.cab-login::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  height: 2px;
+  background: var(--text);
+}
+.cab-login-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.cab-login-title {
+  font-size: clamp(1.4rem, 3.5vw, 2rem);
+  margin: 0.9rem 0 1.75rem;
+}
+.cab-login-form { display: flex; flex-direction: column; align-items: flex-start; }
+
+.cab-field { display: flex; flex-direction: column; gap: 0.6rem; width: 100%; }
+.cab-field label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.cab-input {
+  width: 100%;
+  padding: 1rem 1.15rem;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.cab-input::placeholder { color: var(--text-mute); }
+.cab-input:focus {
+  outline: none;
+  border-color: var(--text);
+  background: var(--bg-3);
+}
+.cab-hint {
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--text-mute);
+}
+
+/* Строка ошибки: нейтральный терминальный стиль (красный — только бейджи NEW) */
+.cab-err {
+  min-height: 1.6rem;
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.cab-err.show { opacity: 1; transform: none; }
+
+.cab-submit { margin-top: 1.25rem; }
+.cab-submit:disabled { opacity: 0.5; cursor: wait; transform: none; }
+
+/* --- Загрузка --- */
+.cab-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding-block: clamp(3rem, 8vw, 5rem);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+.cab-caret {
+  width: 0.6em;
+  height: 1.1em;
+  background: var(--text);
+  animation: caret 1.1s steps(1) infinite;
+}
+
+/* --- Дашборд --- */
+.cab-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+.cab-head-title {
+  font-family: var(--font-mono);
+  font-size: clamp(1.05rem, 2.6vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+.cab-logout { padding: 0.7rem 1.3rem; font-size: 0.72rem; }
+
+.cab-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.cab-sec {
+  background: var(--bg);
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  transition: background var(--dur) var(--ease);
+}
+.cab-sec:hover { background: var(--bg-2); }
+.cab-sec .eyebrow { margin-bottom: 1rem; }
+.cab-sec--wide { grid-column: 1 / -1; }
+
+.cab-sec-body { font-size: 0.95rem; }
+.cab-value {
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  word-break: break-word;
+}
+.cab-muted {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--text-mute);
+}
+.cab-site-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid var(--line-2);
+  word-break: break-all;
+  transition: border-color var(--dur) var(--ease);
+}
+.cab-site-link::before { content: "→"; color: var(--text-mute); flex-shrink: 0; }
+.cab-site-link:hover { border-color: var(--text); }
+
+.cab-tasks { display: flex; flex-direction: column; }
+.cab-task {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px dashed var(--line);
+  font-size: 0.92rem;
+}
+.cab-task:last-child { border-bottom: none; }
+.cab-task-glyph {
+  width: 1.1em;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+.cab-task-title { flex: 1; color: var(--text-dim); }
+.cab-task-status {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--text-mute);
+  white-space: nowrap;
+}
+
+.cab-foot {
+  margin-top: 2rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--text-mute);
+}
+
+/* --- Навигация по разделам кабинета --- */
+.cab-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+.cab-nav-link {
+  appearance: none;
+  border: 1px solid transparent;
+  background: none;
+  padding: 0.55rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.cab-nav-link:hover { color: var(--text); border-color: var(--line-2); }
+.cab-nav-link.is-active {
+  color: var(--text);
+  border-color: var(--text);
+  background: var(--bg-3);
+}
+
+/* --- Карточка внутри раздела --- */
+.cab-card {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  margin-bottom: 1.25rem;
+}
+.cab-card .eyebrow { margin-bottom: 1rem; }
+
+/* --- Главная --- */
+.cab-welcome-title {
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  margin-bottom: 0.75rem;
+}
+.cab-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+.cab-tile {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 1.4rem 1.5rem;
+  background: var(--bg);
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  transition: background var(--dur) var(--ease);
+}
+.cab-tile:hover { background: var(--bg-2); }
+.cab-tile-title {
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  letter-spacing: 0.05em;
+  color: var(--text);
+}
+.cab-tile-note {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--text-mute);
+}
+.cab-tile-arrow {
+  margin-top: auto;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+/* --- Новости --- */
+.cab-news-item { padding: 0.9rem 0; border-bottom: 1px dashed var(--line); }
+.cab-news-item:last-child { border-bottom: none; padding-bottom: 0; }
+.cab-news-title { color: var(--text); font-size: 0.95rem; margin-bottom: 0.3rem; }
+.cab-news-body { color: var(--text-dim); font-size: 0.88rem; line-height: 1.55; }
+.cab-news-date {
+  margin-top: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--text-mute);
+}
+
+/* --- Подписка --- */
+.cab-sub-info { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.cab-sub-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.cab-sub-pill.is-active {
+  border-color: var(--text);
+  color: var(--text);
+}
+.cab-sub-plan {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  letter-spacing: 0.05em;
+  color: var(--text);
+}
+.cab-actions { margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.cab-actions .btn { text-decoration: none; }
+
+/* --- Мои данные --- */
+.cab-profile-rows { display: flex; flex-direction: column; }
+.cab-profile-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px dashed var(--line);
+  font-size: 0.92rem;
+}
+.cab-profile-row:last-child { border-bottom: none; }
+.cab-profile-label {
+  flex-shrink: 0;
+  width: 9rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+
+/* --- Адаптив кабинета --- */
+@media (max-width: 860px) {
+  .cab-grid { grid-template-columns: 1fr; }
+  .cab-sec--wide { grid-column: auto; }
+}
+
+@media (max-width: 640px) {
+  .cab-login { padding: 1.5rem 1.25rem; }
+  .cab-submit { width: 100%; justify-content: center; }
+  .cab-task { flex-wrap: wrap; }
+  .cab-task-status { white-space: normal; }
+  .cab-tiles { grid-template-columns: 1fr; }
+  .cab-nav { gap: 0.25rem; }
+  .cab-nav-link { flex: 1 1 auto; text-align: center; padding: 0.55rem 0.6rem; }
+  .cab-profile-label { width: 7rem; }
+}
