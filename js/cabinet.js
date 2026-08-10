@@ -28,6 +28,8 @@
   var subscription = null; // подписка (строка или null)
   var news = [];           // новости
   var view = "home";       // home | tasks | sub | profile
+  var currentUserId = "";  // id из сессии (для онлайн-статуса)
+  var heartbeatTimer = null;
 
   /* Статусы задач: поле tasks.status → глиф + подпись */
   var STATUS = {
@@ -189,6 +191,7 @@
     return supabase.auth.signInWithPassword({ email: email, password: password })
       .then(function (res) {
         if (res.error) throw res.error;
+        if (res.data && res.data.user) recordVisit(res.data.user.id);
         loadCabinet();
       })
       .catch(function (err) {
@@ -198,12 +201,41 @@
   }
 
   function doLogout() {
+    stopHeartbeat();
     supabase.auth.signOut()
       .catch(function (err) { console.error("cabinet: signOut failed", err); })
       .then(function () {
         profile = null; tasks = []; subscription = null; news = [];
         renderLogin();
       });
+  }
+
+  /* ---------- Онлайн-статус (для владельца) ---------- */
+
+  // Визит: запись в history при каждом входе клиента
+  function recordVisit(userId) {
+    if (!userId) return;
+    supabase.from("visits").insert({ user_id: userId })
+      .then(function (r) { if (r.error) console.error("cabinet: visit failed", r.error); })
+      .catch(function (err) { console.error("cabinet: visit failed", err); });
+  }
+
+  // Heartbeat: пока страница открыта, каждые 30 с обновляем last_seen_at.
+  // Клиент считается онлайн, если last_seen_at свежее 2 минут.
+  function startHeartbeat(userId) {
+    stopHeartbeat();
+    if (!userId) return;
+    currentUserId = userId;
+    heartbeatTimer = setInterval(function () {
+      supabase.from("profiles").update({ last_seen_at: new Date().toISOString() })
+        .eq("id", userId)
+        .then(function (r) { if (r.error) console.error("cabinet: heartbeat failed", r.error); })
+        .catch(function (err) { console.error("cabinet: heartbeat failed", err); });
+    }, 30000);
+  }
+
+  function stopHeartbeat() {
+    if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
   }
 
   /* ---------- Загрузка данных ---------- */
@@ -239,6 +271,7 @@
           return;
         }
         clientEmail = sess.session.user && sess.session.user.email ? sess.session.user.email : "";
+        startHeartbeat(sess.session.user.id);
         view = "home";
         renderCabinet();
       })

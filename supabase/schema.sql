@@ -13,8 +13,13 @@ create table if not exists public.profiles (
   site_url       text,                          -- сайт клиента
   contact        text,                          -- контакт (телефон/почта)
   project_status text,                          -- краткий статус проекта (для главной)
+  last_seen_at   timestamptz,                   -- последняя активность (онлайн-статус)
   created_at     timestamptz not null default now()
 );
+
+-- Для уже созданных БД: добавляем колонку, если её ещё нет
+-- (повторный запуск schema.sql безопасен).
+alter table public.profiles add column if not exists last_seen_at timestamptz;
 
 -- ---------- Задачи проекта ----------
 -- UNIQUE (user_id, title): защита от дублей при повторном запуске seed.sql.
@@ -52,6 +57,16 @@ create table if not exists public.news (
   constraint news_title_unique unique (title)
 );
 
+-- ---------- Посещения кабинета (история для владельца) ----------
+-- Запись добавляется при каждом входе клиента в кабинет.
+-- «Онлайн сейчас» считается по profiles.last_seen_at (свежее 2 минут),
+-- а эта таблица хранит историю визитов.
+create table if not exists public.visits (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references public.profiles (id) on delete cascade,
+  visited_at timestamptz not null default now()
+);
+
 -- ---------- Автосоздание профиля при регистрации пользователя ----------
 -- Логин клиента = часть email до «@» (в панели создаёте email вида
 -- <логин>@amdev.local, клиент вводит просто <логин>).
@@ -85,10 +100,21 @@ alter table public.profiles     enable row level security;
 alter table public.tasks        enable row level security;
 alter table public.subscriptions enable row level security;
 alter table public.news         enable row level security;
+alter table public.visits       enable row level security;
 
 drop policy if exists "profiles_select_own" on public.profiles;
 create policy "profiles_select_own" on public.profiles
   for select using (auth.uid() = id);
+
+-- Клиент обновляет свою строку профиля (heartbeat: last_seen_at каждые ~30 с)
+drop policy if exists "profiles_update_own" on public.profiles;
+create policy "profiles_update_own" on public.profiles
+  for update to authenticated using (auth.uid() = id) with check (auth.uid() = id);
+
+-- Владелец (роль owner) видит профили всех клиентов — для дашборда «онлайн»
+drop policy if exists "profiles_select_owner" on public.profiles;
+create policy "profiles_select_owner" on public.profiles
+  for select to authenticated using (auth.jwt() ->> 'role' = 'owner');
 
 drop policy if exists "tasks_select_own" on public.tasks;
 drop policy if exists "tasks_all_own" on public.tasks;
@@ -103,11 +129,27 @@ drop policy if exists "news_select_auth" on public.news;
 create policy "news_select_auth" on public.news
   for select to authenticated using (true);
 
+-- Визиты: клиент добавляет и видит только свои
+drop policy if exists "visits_insert_own" on public.visits;
+create policy "visits_insert_own" on public.visits
+  for insert to authenticated with check (auth.uid() = user_id);
+
+drop policy if exists "visits_select_own" on public.visits;
+create policy "visits_select_own" on public.visits
+  for select to authenticated using (auth.uid() = user_id);
+
+-- Владелец (роль owner) видит историю посещений всех клиентов
+drop policy if exists "visits_select_owner" on public.visits;
+create policy "visits_select_owner" on public.visits
+  for select to authenticated using (auth.jwt() ->> 'role' = 'owner');
+
 -- ---------- Доступ к таблицам через Data API (REST) ----------
 -- GRANT даёт доступ к таблицам как таковым; какие строки видны —
 -- решает RLS выше (аноним не увидит ничего, клиент — только свои).
 grant usage on schema public to anon, authenticated;
 grant select on all tables in schema public to anon, authenticated;
+grant update on public.profiles to authenticated;   -- heartbeat last_seen_at
+grant insert, select on public.visits to authenticated;
 alter default privileges in schema public
   grant select on tables to anon, authenticated;
 
@@ -115,3 +157,4 @@ alter default privileges in schema public
 create index if not exists tasks_user_idx      on public.tasks (user_id);
 create index if not exists subs_user_idx       on public.subscriptions (user_id);
 create index if not exists news_created_idx    on public.news (created_at desc);
+create index if not exists visits_user_idx     on public.visits (user_id, visited_at desc);
