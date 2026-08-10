@@ -17,13 +17,15 @@ create table if not exists public.profiles (
 );
 
 -- ---------- Задачи проекта ----------
+-- UNIQUE (user_id, title): защита от дублей при повторном запуске seed.sql.
 create table if not exists public.tasks (
   id         uuid primary key default gen_random_uuid(),
   user_id    uuid not null references auth.users on delete cascade,
   title      text not null,
   status     text not null default 'waiting' check (status in ('done', 'in progress', 'waiting')),
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  constraint tasks_user_title_unique unique (user_id, title)
 );
 
 -- ---------- Подписки ----------
@@ -41,11 +43,13 @@ create table if not exists public.subscriptions (
 );
 
 -- ---------- Новости (видны всем клиентам) ----------
+-- UNIQUE (title): защита от дублей при повторном запуске seed.sql.
 create table if not exists public.news (
   id         uuid primary key default gen_random_uuid(),
   title      text not null,
   body       text not null,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  constraint news_title_unique unique (title)
 );
 
 -- ---------- Автосоздание профиля при регистрации пользователя ----------

@@ -23,6 +23,7 @@
 
   /* Состояние кабинета */
   var profile = null;      // строка profiles
+  var clientEmail = "";    // email из сессии (для раздела «Мои данные»)
   var tasks = [];          // задачи
   var subscription = null; // подписка (строка или null)
   var news = [];           // новости
@@ -102,9 +103,9 @@
       '<h2 class="cab-login-title">Вход в кабинет</h2>' +
       '<form class="cab-login-form" autocomplete="on">' +
       '  <div class="cab-field">' +
-      '    <label for="cabLogin">Логин</label>' +
-      '    <input class="cab-input" id="cabLogin" name="login" type="text" autocomplete="username" placeholder="Ваш логин" spellcheck="false" required>' +
-      '    <p class="cab-hint">Логин указан в договоре на обслуживание</p>' +
+      '    <label for="cabLogin">Логин или email</label>' +
+      '    <input class="cab-input" id="cabLogin" name="login" type="text" autocomplete="username" placeholder="Логин или email" spellcheck="false" required>' +
+      '    <p class="cab-hint">Логин или email указан в договоре на обслуживание</p>' +
       '  </div>' +
       '  <div class="cab-field" style="margin-top:1.1rem">' +
       '    <label for="cabPass">Пароль</label>' +
@@ -137,7 +138,7 @@
       var l = login.value.trim();
       var p = pass.value;
       if (!l || !p) {
-        setError("// Введите логин и пароль");
+        setError("// Введите логин (или email) и пароль");
         return;
       }
       errEl.textContent = "";
@@ -191,7 +192,7 @@
         loadCabinet();
       })
       .catch(function (err) {
-        renderLogin("// Неверный логин или пароль");
+        renderLogin("// Неверный логин (или email) или пароль");
         console.error("cabinet: signIn failed", err);
       });
   }
@@ -237,6 +238,7 @@
           renderLogin();
           return;
         }
+        clientEmail = sess.session.user && sess.session.user.email ? sess.session.user.email : "";
         view = "home";
         renderCabinet();
       })
@@ -453,7 +455,8 @@
         rows.appendChild(profileRowNode("Сайт", link));
       }
       if (profile.contact) rows.appendChild(profileRow("Контакт", profile.contact));
-      rows.appendChild(profileRow("Логин", profile.username));
+      if (clientEmail) rows.appendChild(profileRow("Email", clientEmail));
+      if (profile.username) rows.appendChild(profileRow("Логин", profile.username));
       if (profile.created_at) rows.appendChild(profileRow("В системе с", fmtDate(profile.created_at)));
     }
 
