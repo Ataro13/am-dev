@@ -240,6 +240,21 @@ body::after {
 .nav a.active { color: var(--text); }
 .nav a.active::after { transform: scaleX(1); }
 
+/* Пункт «Личный кабинет»: иконка по центру строки (десктоп) */
+.nav a[data-page="cabinet"] {
+  display: inline-flex;
+  align-items: center;
+}
+.nav a .nav-ico {
+  width: 14px;
+  height: 14px;
+  margin-right: 0.45rem;
+  opacity: 0.85;
+  transition: opacity var(--dur) var(--ease);
+}
+.nav a:hover .nav-ico,
+.nav a.active .nav-ico { opacity: 1; }
+
 /* Бургер */
 .burger {
   display: none;
@@ -325,6 +340,21 @@ html[data-theme="light"] .theme-toggle .icon-moon { display: block; }
   letter-spacing: 0.2em;
   color: var(--text-mute);
 }
+/* Пункт «Личный кабинет»: иконка по центру строки (мобильное меню) */
+.mobile-menu nav a[data-page="cabinet"] { align-items: center; }
+.mobile-menu nav .m-title {
+  display: inline-flex;
+  align-items: center;
+}
+.mobile-menu nav .m-ico {
+  width: 20px;
+  height: 20px;
+  margin-right: 0.65rem;
+  opacity: 0.85;
+  transition: opacity var(--dur) var(--ease);
+}
+.mobile-menu nav a:hover .m-ico,
+.mobile-menu nav a.active .m-ico { opacity: 1; }
 .mobile-menu nav a:hover, .mobile-menu nav a.active { color: var(--text); padding-left: 0.75rem; }
 .mobile-menu .menu-foot {
   margin-top: 3rem;
