@@ -761,7 +761,7 @@ html[data-theme="light"] .theme-toggle .icon-moon { display: block; }
   letter-spacing: 0.1em;
   color: var(--text-mute);
 }
-.price-list { display: flex; flex-direction: column; gap: 0.55rem; margin-top: auto; }
+.price-list { display: flex; flex-direction: column; gap: 0.55rem; }
 .price-list li {
   display: flex;
   gap: 0.65rem;
@@ -770,7 +770,7 @@ html[data-theme="light"] .theme-toggle .icon-moon { display: block; }
   font-size: 0.9rem;
 }
 .price-list li::before { content: "+"; font-family: var(--font-mono); color: var(--text); }
-.price-card .btn { margin-top: 1.5rem; justify-content: center; width: 100%; }
+.price-card .btn { margin-top: auto; padding-top: 1.5rem; justify-content: center; width: 100%; }
 .price-foot { color: var(--text-dim); font-size: 0.92rem; margin-top: 2rem; max-width: 72ch; }
 .price-foot p + p { margin-top: 0.6rem; }
 .price-cta {
