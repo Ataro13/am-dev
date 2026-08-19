@@ -1677,4 +1677,91 @@ html .cab-sec { transition: background var(--dur) var(--ease), color var(--dur) 
   .cab-nav { gap: 0.25rem; }
   .cab-nav-link { flex: 1 1 auto; text-align: center; padding: 0.55rem 0.6rem; }
   .cab-profile-label { width: 7rem; }
+  .cab-progress-head { flex-direction: column; gap: 0.3rem; }
+}
+
+/* --- Статус-индикатор (лампочка) --- */
+.cab-sub-header {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 1.25rem;
+}
+.cab-sub-light {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid var(--line-2);
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.cab-sub-light.is-green {
+  background: #22c55e;
+  border-color: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+}
+.cab-sub-light.is-red {
+  background: #ef4444;
+  border-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+.cab-sub-light-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+/* Лампочка в плитке главной */
+.cab-tile-light {
+  width: 8px;
+  height: 8px;
+  margin-right: 0.5rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* --- Полоска прогресса (часы) --- */
+.cab-progress {
+  margin: 1.25rem 0;
+}
+.cab-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.cab-progress-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.cab-progress-val {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+.cab-progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.cab-progress-bar {
+  height: 100%;
+  background: var(--text);
+  border-radius: var(--radius);
+  transition: width 0.8s var(--ease);
+}
+.cab-progress--mid {
+  background: #eab308;
+}
+.cab-progress--warn {
+  background: #ef4444;
 }

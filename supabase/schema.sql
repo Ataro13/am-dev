@@ -17,9 +17,11 @@ create table if not exists public.profiles (
   created_at     timestamptz not null default now()
 );
 
--- Для уже созданных БД: добавляем колонку, если её ещё нет
+-- Для уже созданных БД: добавляем колонки, если их ещё нет
 -- (повторный запуск schema.sql безопасен).
 alter table public.profiles add column if not exists last_seen_at timestamptz;
+alter table public.subscriptions add column if not exists hours_left  numeric(4,1);
+alter table public.subscriptions add column if not exists hours_total numeric(4,1);
 
 -- ---------- Задачи проекта ----------
 -- UNIQUE (user_id, title): защита от дублей при повторном запуске seed.sql.
@@ -38,13 +40,15 @@ create table if not exists public.tasks (
 -- (или просто отсутствие строки). Клиент видит только статус;
 -- изменения вносит владелец через Table Editor.
 create table if not exists public.subscriptions (
-  id         uuid primary key default gen_random_uuid(),
-  user_id    uuid not null references auth.users on delete cascade,
-  plan       text,                              -- тариф (например: «Стандарт»)
-  status     text not null default 'none' check (status in ('active', 'none')),
-  started_at date,
-  expires_at date,
-  price      numeric(10,2)                      -- ₽/мес
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references auth.users on delete cascade,
+  plan         text,                              -- тариф (например: «Базовый»)
+  status       text not null default 'none' check (status in ('active', 'none')),
+  started_at   date,
+  expires_at   date,
+  price        numeric(10,2),                     -- ₽/мес
+  hours_left   numeric(4,1),                      -- оставшиеся часы текущего периода
+  hours_total  numeric(4,1)                       -- общее кол-во часов в тарифе
 );
 
 -- ---------- Новости (видны всем клиентам) ----------

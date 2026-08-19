@@ -361,10 +361,12 @@
     var tiles = el("div", "cab-tiles");
 
     var taskCount = tasks.length;
-    var subLabel = (subscription && subscription.status === "active") ? "активна" : "не оформлена";
+    var subActive = subscription && subscription.status === "active";
+    var subLightHtml = '<span class="cab-sub-light cab-tile-light ' + (subActive ? 'is-green' : 'is-red') + '"></span>';
+    var subLabel = subActive ? "активна" : "не оформлена";
 
     tiles.appendChild(makeTile("tasks", "Задачи", taskCount ? taskCount + " задач(и)" : "пока пусто"));
-    tiles.appendChild(makeTile("sub", "Подписка", subLabel));
+    tiles.appendChild(makeTile("sub", subLightHtml + "Подписка", subLabel));
     tiles.appendChild(makeTile("profile", "Мои данные", (profile && (profile.site_url || profile.contact)) ? "контакты и сайт" : "профиль"));
     box.appendChild(tiles);
 
@@ -434,11 +436,40 @@
 
     var active = subscription && subscription.status === "active";
 
+    /* Статус-индикатор: зелёная лампочка = активна, красная = не активна */
+    var lightClass = "cab-sub-light" + (active ? " is-green" : " is-red");
+    var lightLabel = active ? "подписка активна" : "подписка не активна";
+
+    var header = el("div", "cab-sub-header");
+    header.innerHTML =
+      '<span class="' + lightClass + '" aria-label="' + esc(lightLabel) + '"></span>' +
+      '<span class="cab-sub-light-label">' + esc(lightLabel) + '</span>';
+    box.appendChild(header);
+
     if (active) {
       var info = el("div", "cab-sub-info");
       info.innerHTML =
         '<span class="cab-sub-pill is-active">активна</span>' +
         '<p class="cab-sub-plan">' + esc(subscription.plan || "Подписка") + '</p>';
+      box.appendChild(info);
+
+      /* Полоска прогресса: остаток часов */
+      var total = Number(subscription.hours_total) || 0;
+      var left  = Number(subscription.hours_left) || 0;
+      if (total > 0) {
+        var pct = Math.max(0, Math.min(100, (left / total) * 100));
+        var warnClass = pct <= 20 ? " cab-progress--warn" : (pct <= 50 ? " cab-progress--mid" : "");
+        var progress = el("div", "cab-progress");
+        progress.innerHTML =
+          '<div class="cab-progress-head">' +
+          '  <span class="cab-progress-label">// остаток часов</span>' +
+          '  <span class="cab-progress-val">' + left.toFixed(1) + 'ч / ' + total.toFixed(1) + 'ч</span>' +
+          '</div>' +
+          '<div class="cab-progress-track">' +
+          '  <div class="cab-progress-bar' + warnClass + '" style="width:' + pct.toFixed(1) + '%"></div>' +
+          '</div>';
+        box.appendChild(progress);
+      }
 
       var rows = el("div", "cab-profile-rows");
       if (subscription.started_at) {
@@ -447,7 +478,6 @@
       if (subscription.price != null) {
         rows.appendChild(profileRow("Стоимость", fmtMoney(subscription.price) + " / мес"));
       }
-      box.appendChild(info);
       box.appendChild(rows);
 
       var foot = el("p", "cab-muted", "// Изменения подписки — по договорённости с AM.DEV.");
