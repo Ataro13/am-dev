@@ -214,3 +214,162 @@
   `visits` — лог входов (user_id, visited_at) для истории посещений.
 - Изменения в git не коммитились — по завершении спросить владельца,
   коммитить ли.
+
+## 6. Как менять данные клиентов (чек-лист для будущих сессий)
+
+> Все изменения данных — через SQL Editor в Dashboard владельца.
+> MCP Supabase НЕ авторизован → ручной путь.
+
+### 6.1. Клиенты и их user_id
+
+| Клиент | email | user_id | username |
+|---|---|---|---|
+| Бэла Даудова | dau-bela@yandex.ru | fedca2a0-beaa-4862-bbe4-a5a30cf68a1f | dau-bela |
+
+При создании нового клиента:
+1. Dashboard → Authentication → Users → Add user (email `<логин>@amdev.local`,
+   пароль — сгенерировать и передать владельцу).
+2. Триггер `handle_new_user()` автоматически создаёт строку в `profiles`
+   (username = часть email до `@`).
+3. Данные (задачи, подписка) — добавлять через SQL (см. ниже).
+
+### 6.2. Изменение профиля (profiles)
+
+```sql
+-- Изменить имя / статус проекта / сайт / контакт
+UPDATE public.profiles
+SET display_name   = 'Новое Имя',
+    project_status = 'Новый статус',
+    site_url       = 'https://example.com',
+    contact        = '+7 (999) 123-45-67'
+WHERE id = 'fedca2a0-beaa-4862-bbe4-a5a30cf68a1f';
+```
+
+### 6.3. Управление подпиской (subscriptions)
+
+Структура таблицы `subscriptions`:
+- `user_id` (uuid, UNIQUE) — привязка к пользователю
+- `plan` (text) — тариф: «Базовый», «Стандарт», «Профи» и т.д.
+- `status` (text) — `'active'` или `'none'`
+- `started_at` (date) — дата начала
+- `expires_at` (date) — дата окончания
+- `price` (numeric) — стоимость ₽/мес
+- `hours_left` (numeric) — оставшиеся часы
+- `hours_total` (numeric) — общее кол-во часов в тарифе
+
+```sql
+-- Назначить/обновить подписку (идемпотентно — ON CONFLICT)
+INSERT INTO public.subscriptions (user_id, plan, status, started_at, expires_at, price, hours_left, hours_total)
+VALUES (
+  'fedca2a0-beaa-4862-bbe4-a5a30cf68a1f',  -- user_id клиента
+  'Базовый',                                  -- тариф
+  'active',                                   -- статус
+  '2026-08-17',                               -- начало
+  '2026-09-17',                               -- окончание
+  NULL,                                       -- стоимость (или число)
+  1.3,                                        -- остаток часов
+  10.0                                        -- всего часов в тарифе
+)
+ON CONFLICT (user_id) DO UPDATE SET
+  plan        = EXCLUDED.plan,
+  status      = EXCLUDED.status,
+  started_at  = EXCLUDED.started_at,
+  expires_at  = EXCLUDED.expires_at,
+  price       = EXCLUDED.price,
+  hours_left  = EXCLUDED.hours_left,
+  hours_total = EXCLUDED.hours_total;
+```
+
+```sql
+-- Продлить подписку (сдвинуть дату окончания)
+UPDATE public.subscriptions
+SET expires_at = '2026-10-17',
+    hours_left = 5.0
+WHERE user_id = 'fedca2a0-beaa-4862-bbe4-a5a30cf68a1f'
+  AND status = 'active';
+```
+
+```sql
+-- Деактивировать подписку
+UPDATE public.subscriptions
+SET status = 'none'
+WHERE user_id = 'fedca2a0-beaa-4862-bbe4-a5a30cf68a1f';
+```
+
+```sql
+-- Проверить подписку клиента
+SELECT s.plan, s.status, s.started_at, s.expires_at,
+       s.hours_left, s.hours_total, s.price,
+       p.display_name
+FROM public.subscriptions s
+JOIN public.profiles p ON p.id = s.user_id
+WHERE s.user_id = 'fedca2a0-beaa-4862-bbe4-a5a30cf68a1f';
+```
+
+### 6.4. Управление задачами (tasks)
+
+Структура: `user_id`, `title`, `status` (`'done'` / `'in progress'` / `'waiting'`).
+Уникальность: `UNIQUE (user_id, title)`.
+
+```sql
+-- Добавить задачу
+INSERT INTO public.tasks (user_id, title, status)
+VALUES ('fedca2a0-beaa-4862-bbe4-a5a30cf68a1f', 'Новая задача', 'waiting')
+ON CONFLICT (user_id, title) DO NOTHING;
+
+-- Изменить статус задачи
+UPDATE public.tasks
+SET status = 'done', updated_at = now()
+WHERE user_id = 'fedca2a0-beaa-4862-bbe4-a5a30cf68a1f'
+  AND title = 'Новая задача';
+
+-- Удалить задачу
+DELETE FROM public.tasks
+WHERE user_id = 'fedca2a0-beaa-4862-bbe4-a5a30cf68a1f'
+  AND title = 'Новая задача';
+
+-- Список задач клиента
+SELECT title, status, created_at FROM public.tasks
+WHERE user_id = 'fedca2a0-beaa-4862-bbe4-a5a30cf68a1f'
+ORDER BY created_at;
+```
+
+### 6.5. Новости (news)
+
+Видны **всем** авторизованным клиентам. Уникальность: `UNIQUE (title)`.
+
+```sql
+-- Добавить новость
+INSERT INTO public.news (title, body)
+VALUES ('Заголовок', 'Текст новости')
+ON CONFLICT (title) DO NOTHING;
+
+-- Удалить новость
+DELETE FROM public.news WHERE title = 'Заголовок';
+```
+
+### 6.6. Смена email / пароля клиента
+
+См. `supabase/change_user.sql` — идемпотентный скрипт, меняет email,
+пароль и username одним запросом. Подставить нужные значения.
+
+### 6.7. Полезные запросы
+
+```sql
+-- Все клиенты с подписками
+SELECT p.display_name, p.username, s.plan, s.status, s.hours_left, s.hours_total
+FROM public.profiles p
+LEFT JOIN public.subscriptions s ON s.user_id = p.id
+ORDER BY p.display_name;
+
+-- Клиенты без подписки
+SELECT p.display_name, p.username
+FROM public.profiles p
+LEFT JOIN public.subscriptions s ON s.user_id = p.id
+WHERE s.id IS NULL;
+
+-- Посещения клиента (последние 10)
+SELECT visited_at FROM public.visits
+WHERE user_id = 'fedca2a0-beaa-4862-bbe4-a5a30cf68a1f'
+ORDER BY visited_at DESC LIMIT 10;
+```
