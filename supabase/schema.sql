@@ -48,7 +48,8 @@ create table if not exists public.subscriptions (
   expires_at   date,
   price        numeric(10,2),                     -- ₽/мес
   hours_left   numeric(4,1),                      -- оставшиеся часы текущего периода
-  hours_total  numeric(4,1)                       -- общее кол-во часов в тарифе
+  hours_total  numeric(4,1),                      -- общее кол-во часов в тарифе
+  constraint subscriptions_user_id_unique unique (user_id)
 );
 
 -- ---------- Новости (видны всем клиентам) ----------

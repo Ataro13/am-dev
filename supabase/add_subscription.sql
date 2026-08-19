@@ -10,6 +10,30 @@
 alter table public.subscriptions add column if not exists hours_left  numeric(4,1);
 alter table public.subscriptions add column if not exists hours_total numeric(4,1);
 
+-- ---------- 0.5 Проверяем дубликаты ----------
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT user_id, COUNT(*) FROM public.subscriptions
+    GROUP BY user_id HAVING COUNT(*) > 1
+  ) THEN
+    RAISE EXCEPTION 'Найдены дубликаты subscriptions. Сначала выполните дедупликацию.';
+  END IF;
+END $$;
+
+-- ---------- 0.6 Уникальное ограничение на user_id ----------
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'subscriptions_user_id_unique'
+      AND conrelid = 'public.subscriptions'::regclass
+  ) THEN
+    ALTER TABLE public.subscriptions
+      ADD CONSTRAINT subscriptions_user_id_unique UNIQUE (user_id);
+  END IF;
+END $$;
+
 -- ---------- 1. Вставляем подписку ----------
 -- user_id клиента: fedca2a0-beaa-4862-bbe4-a5a30cf68a1f
 insert into public.subscriptions (user_id, plan, status, started_at, expires_at, price, hours_left, hours_total)
