@@ -1,0 +1,1 @@
+[build]\n  publish = "."\n  functions = "netlify/functions"\n\n[functions]\n  node_bundler = "esbuild"\n\n[[redirects]]\n  from = "/api/*"\n  to = "/.netlify/functions/api/:splat"\n  status = 200\n\n[[redirects]]\n  from = "/admin"\n  to = "/admin/index.html"\n  status = 200\n
